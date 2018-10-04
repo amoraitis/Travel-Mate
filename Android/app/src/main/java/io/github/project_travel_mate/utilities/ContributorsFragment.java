@@ -58,7 +58,6 @@ public class ContributorsFragment extends Fragment {
     @BindView(R.id.server_contributors_gv)
     ExpandableHeightGridView server_contributors_gv;
     private String mToken;
-    private Activity mActivity;
     private View mContributorsView;
     private ContributorsAdapter mAndroidContributorsAdapter;
     private ArrayList<Contributor> mAndroidContributors = new ArrayList<>();
@@ -82,18 +81,12 @@ public class ContributorsFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mContributorsView = inflater.inflate(R.layout.fragment_contributors, container, false);
         ButterKnife.bind(this, mContributorsView);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
         mToken = sharedPreferences.getString(USER_TOKEN, null);
         mHandler = new Handler(Looper.getMainLooper());
         mAndroidContributorsAdapter = new ContributorsAdapter(this.getContext(), mAndroidContributors);
@@ -113,6 +106,10 @@ public class ContributorsFragment extends Fragment {
         return mContributorsView;
     }
 
+    /**
+     * Sets the dataset for a given repo
+     * @param repo
+     */
     private void setContributors(String repo) {
         String uri = API_LINK_V2 + "get-contributors/" + repo;
         Log.v("EXECUTING", uri);
@@ -148,6 +145,7 @@ public class ContributorsFragment extends Fragment {
 
                         } catch (IOException e) {
                             e.printStackTrace();
+                            Log.e("ERROR", "Message : " + e.getMessage());
                         }
 
                     }
@@ -157,6 +155,12 @@ public class ContributorsFragment extends Fragment {
         });
     }
 
+    /**
+     * Updates data and UI
+     * Updates the adapter
+     * @param url
+     * @param contributorsList
+     */
     private void updateDataAndUI(String url, ArrayList<Contributor> contributorsList) {
         if (url.contains("server")) {
             mServerContributors = contributorsList;
@@ -174,11 +178,5 @@ public class ContributorsFragment extends Fragment {
     @OnClick(R.id.contributors_footer)
     void github_project_cardview_clicked() {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/project-travel-mate")));
-    }
-
-    @Override
-    public void onAttach(Context activity) {
-        super.onAttach(activity);
-        this.mActivity = (Activity) activity;
     }
 }
